@@ -31,6 +31,7 @@ export async function getPreset({
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
 
-  logger.debug({response, response?.body, parsedUrl}, "Got preset");
+  const responseBody = response?.body;
+  logger.debug({response, responseBody, parsedUrl}, "Got preset");
   return parsePreset(response.body, parsedUrl.pathname);
 }
