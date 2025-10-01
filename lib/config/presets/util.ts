@@ -93,6 +93,7 @@ export function parsePreset(
   fileName: string,
 ): Nullish<Preset> {
   try {
+    logger.debug({content, fileName}, 'Parsing JSON...');
     return parseJson(content, fileName) as Nullish<Preset>;
   } catch {
     throw new Error(PRESET_INVALID_JSON);
