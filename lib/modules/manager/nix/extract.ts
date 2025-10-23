@@ -21,7 +21,7 @@ export async function extractPackageFile(
   const packageLockFile = getSiblingFileName(packageFile, 'flake.lock');
   const lockContents = await readLocalFile(packageLockFile, 'utf8');
 
-  logger.trace(`nix.extractPackageFile(${packageLockFile})`);
+  logger.trace({ packageFile, packageLockFile }, `nix.extractPackageFile(${packageLockFile})`);
 
   const deps: PackageDependency[] = [];
 
@@ -48,6 +48,7 @@ export async function extractPackageFile(
 
   const flakeLock = flakeLockParsed.data;
   const rootInputs = flakeLock.nodes.root.inputs;
+  logger.trace({ rootInputs }, 'got rootInputs');
 
   if (!rootInputs) {
     logger.debug(
@@ -62,13 +63,17 @@ export async function extractPackageFile(
   }
 
   for (const [depName, flakeInput] of Object.entries(flakeLock.nodes)) {
+    logger.trace({ depName }, 'checking node');
+
     // the root input is a magic string for the entrypoint and only references other flake inputs
     if (depName === 'root') {
+      logger.trace({ depName }, 'the root input is a magic string for the entrypoint and only references other flake inputs');
       continue;
     }
 
     // skip all locked and transitivie nodes as they cannot be updated by regular means
     if (!(depName in rootInputs)) {
+      logger.trace({ depName, rootInputs }, '!(depName in rootInputs) -> skip all locked and transitivie nodes as they cannot be updated by regular means');
       continue;
     }
 
@@ -86,11 +91,13 @@ export async function extractPackageFile(
 
     // indirect inputs cannot be reliable updated because they depend on the flake registry
     if (flakeOriginal.type === 'indirect') {
+      logger.trace({ depName, flakeOriginal }, 'indirect inputs cannot be reliable updated because they depend on the flake registry');
       continue;
     }
 
     switch (flakeLocked.type) {
       case 'github':
+        logger.trace({ depName, flakeLocked, flakeOriginal }, 'type case github');
         deps.push({
           depName,
           currentValue: flakeOriginal.ref,
@@ -150,8 +157,10 @@ export async function extractPackageFile(
   }
 
   if (deps.length) {
+    logger.trace({ deps }, 'returning extract deps');
     return { deps };
   }
 
+  logger.debug({ deps }, 'could not extract deps');
   return null;
 }
