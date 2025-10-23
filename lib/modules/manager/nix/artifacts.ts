@@ -21,6 +21,7 @@ export async function updateArtifacts({
     logger.debug('No flake.lock found');
     return null;
   }
+  logger.trace({ packageFileName, lockFileName, config, updatedDeps }, 'nix.updateArtifacts');
 
   let cmd = `nix --extra-experimental-features 'nix-command flakes' `;
 
@@ -57,9 +58,12 @@ export async function updateArtifacts({
   };
 
   try {
+    logger.trace({ cmd, execOptions }, 'starting command');
     await exec(cmd, execOptions);
+    logger.trace('finished nix command');
 
     const status = await getRepoStatus();
+    logger.trace({ status }, 'nix command status');
     if (!status.modified.includes(lockFileName)) {
       return null;
     }
