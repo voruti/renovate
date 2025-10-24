@@ -108,13 +108,13 @@ export async function getUpdatedPackageFiles(
   const lockFileMaintenanceFiles: string[] = [];
   let firstUpdate = true;
   for (const upgrade of config.upgrades) {
-    logger.trace({ upgrade }, 'manager.getUpdatedPackageFiles for every upgrade');
     const manager = upgrade.manager!;
     const packageFile = upgrade.packageFile!;
     const depName = upgrade.depName!;
     // TODO: fix types, can be undefined (#22198)
     const newVersion = upgrade.newVersion!;
     const currentVersion = upgrade.currentVersion!;
+    logger.trace({ packageFile, depName, currentVersion, newVersion }, 'manager.getUpdatedPackageFiles - for every upgrade');
     const updateLockedDependency = get(manager, 'updateLockedDependency')!;
     managerPackageFiles[manager] ??= new Set<string>();
     managerPackageFiles[manager].add(packageFile);
@@ -128,6 +128,7 @@ export async function getUpdatedPackageFiles(
     let lockFileContent: string | null = null;
     const lockFile = upgrade.lockFile ?? upgrade.lockFiles?.[0] ?? '';
     if (lockFile) {
+      logger.trace({ packageFile, depName, lockFile }, 'manager.getUpdatedPackageFiles - lockFile exists');
       lockFileContent = await getFileContent(
         updatedFileContents,
         lockFile,
@@ -149,6 +150,7 @@ export async function getUpdatedPackageFiles(
       });
     }
     if (upgrade.updateType === 'lockFileMaintenance') {
+      logger.trace({ packageFile, depName }, 'manager.getUpdatedPackageFiles - is lockFileMaintenance');
       lockFileMaintenanceFiles.push(packageFile);
     } else if (upgrade.isRemediation) {
       const { status, files } = await updateLockedDependency({
@@ -183,7 +185,9 @@ export async function getUpdatedPackageFiles(
         upgrade.remediationNotPossible = true;
       }
     } else if (upgrade.isLockfileUpdate) {
+      logger.trace({ packageFile, depName }, 'manager.getUpdatedPackageFiles - isLockfileUpdate');
       if (updateLockedDependency) {
+        logger.trace({ packageFile, depName }, 'manager.getUpdatedPackageFiles - starting updateLockedDependency...');
         const { status, files } = await updateLockedDependency({
           ...upgrade,
           depName,
