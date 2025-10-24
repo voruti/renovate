@@ -216,6 +216,7 @@ export async function doAutoReplace(
     autoReplaceGlobalMatch,
     autoReplaceStringTemplate,
   } = upgrade;
+  logger.trace({ packageFile, depName, depNameTemplate, newName, currentValue, currentValueTemplate, newValue, currentDigest, currentDigestShort, newDigest, autoReplaceGlobalMatch, autoReplaceStringTemplate, existingContent, reuseExistingBranch, firstUpdate }, 'autoReplace start');
   /*
     If replacement support for more managers is added,
     please also update the list in docs/usage/configuration-options.md
@@ -440,12 +441,14 @@ export async function doAutoReplace(
           `Found match at index ${searchIndex}`,
         );
         // Now test if the result matches
+        logger.trace({ depName, content: newContent, searchIndex, oldString: replaceString!, newString }, 'autoReplace do replaceAt...');
         newContent = replaceAt(
           newContent,
           searchIndex,
           replaceString!,
           newString,
         );
+        logger.trace({ depName, newContent }, 'autoReplace replaceAt result');
         await writeLocalFile(upgrade.packageFile!, newContent);
         if (await confirmIfDepUpdated(upgrade, newContent)) {
           return newContent;

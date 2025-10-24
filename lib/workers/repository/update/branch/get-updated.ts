@@ -240,15 +240,18 @@ export async function getUpdatedPackageFiles(
     } else {
       const updateDependency = get(manager, 'updateDependency');
       if (!updateDependency) {
+        logger.trace({ packageFile, depName, reuseExistingBranch, firstUpdate }, 'manager.getUpdatedPackageFiles - starting doAutoReplace...');
         let res = await doAutoReplace(
           upgrade,
           packageFileContent!,
           reuseExistingBranch,
           firstUpdate,
         );
+        logger.trace({ packageFile, depName, res }, 'manager.getUpdatedPackageFiles - doAutoReplace result');
         firstUpdate = false;
         if (res) {
           res = await applyManagerBumpPackageVersion(res, upgrade);
+          logger.trace({ packageFile, depName, res }, 'manager.getUpdatedPackageFiles - applyManagerBumpPackageVersion result');
           if (res === packageFileContent) {
             logger.debug({ packageFile, depName }, 'No content changed');
           } else {
