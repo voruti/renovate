@@ -108,6 +108,7 @@ export async function getUpdatedPackageFiles(
   const lockFileMaintenanceFiles: string[] = [];
   let firstUpdate = true;
   for (const upgrade of config.upgrades) {
+    logger.trace({ upgrade }, 'manager.getUpdatedPackageFiles for every upgrade');
     const manager = upgrade.manager!;
     const packageFile = upgrade.packageFile!;
     const depName = upgrade.depName!;
@@ -252,6 +253,7 @@ export async function getUpdatedPackageFiles(
           }
           continue;
         } else if (reuseExistingBranch) {
+          logger.trace({ reuseExistingBranch: false }, 'manager.getUpdatedPackageFiles return');
           return getUpdatedPackageFiles({
             ...config,
             reuseExistingBranch: false,
@@ -438,6 +440,7 @@ export async function getUpdatedPackageFiles(
       }
     }
   }
+  logger.trace({ reuseExistingBranch, updatedPackageFiles, updatedArtifacts, artifactErrors, artifactNotices }, 'manager.getUpdatedPackageFiles return');
   return {
     reuseExistingBranch, // Need to overwrite original config
     updatedPackageFiles,
