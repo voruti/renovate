@@ -116,6 +116,7 @@ export async function getUpdatedPackageFiles(
     const currentVersion = upgrade.currentVersion!;
     logger.trace({ packageFile, depName, currentVersion, newVersion }, 'manager.getUpdatedPackageFiles - for every upgrade');
     const updateLockedDependency = get(manager, 'updateLockedDependency')!;
+    logger.trace({ packageFile, depName, updateLockedDependency }, 'manager.getUpdatedPackageFiles - got updateLockedDependency');
     managerPackageFiles[manager] ??= new Set<string>();
     managerPackageFiles[manager].add(packageFile);
     packageFileUpdatedDeps[packageFile] ??= [];
